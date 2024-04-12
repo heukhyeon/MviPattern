@@ -98,6 +98,34 @@ class MessageListViewModel @Inject(
 
 ## Flow Diagram
 
-### User Interaction
+### State Update With User Interaction
 
 ![Image](/doc/diagram_userinteraction.png)
+
+```kotlin
+
+@Composable
+fun MyMessage(message : String) {
+    val emitter = LocalIntentEmitter.current
+    Text(text = message, modifier = Modifier.clickable(onClick = { emitter.dispatch(MessageClickIntent(message)) }))
+}
+```
+
+### State Update Without User Interaction
+
+![Image2](/doc/diagram_without_userinteraction.png)
+
+Socket example, we sometimes need to change the state of the screen by means other than direct action by the user in our application.
+
+```kotlin
+
+class MessageMiddleware @Inject constructor(
+    private val observeMessageSocketUseCase : ObserveMessageSocketUseCase
+) : Middleware<MessageState> {
+
+    override fun produceIntentFlow() : Flow<Intent> {
+        return observeMessageSocketUseCase().map { MessageSocketChangedIntent(it) }
+    }
+}
+
+```
